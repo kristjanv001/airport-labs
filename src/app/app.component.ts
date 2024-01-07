@@ -1,9 +1,10 @@
-import { AfterViewInit, Component, inject } from '@angular/core';
+import { AfterViewInit, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import * as Leaflet from 'leaflet';
 import { LeafletModule } from '@asymmetrik/ngx-leaflet';
 import { MarkerService } from './marker.service';
+import { AirportsService } from './airports.service';
 import { HttpClient } from '@angular/common/http';
 
 
@@ -13,54 +14,54 @@ import { HttpClient } from '@angular/common/http';
   imports: [CommonModule, RouterOutlet, LeafletModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
-  providers: [MarkerService]
+  providers: [MarkerService, AirportsService]
 })
-export class AppComponent implements AfterViewInit {
+export class AppComponent implements AfterViewInit, OnInit {
   title = 'airport-labs';
+  private airports: any = [];
   private markerService = inject(MarkerService);
+  private airportsService = inject(AirportsService);
+
   private map!: Leaflet.Map;
 
-  sayHello(): void {
-    this.markerService.sayHello().subscribe(val => console.log(val));
+  constructor(private httpClient: HttpClient) { }
+
+  ngOnInit() { 
+    
+  };
+
+  ngAfterViewInit(): void {
+    this.initMap();
+    this.getAirports("NO");
   }
 
-  makeCapitalMarkers() {
-    this.markerService.makeCapitalMarkers(this.map);
+  private displayCountryAirports() {
+    this.markerService.makeMarkers(this.map, this.airports);
+  }
+
+  private getAirports(countryCode: string): void {
+    this.airportsService.getCountryAirports(countryCode)
+      .subscribe((airports) => {
+        this.airports = airports.response.filter((airport: any) => airport.iata_code !== null);
+
+        this.displayCountryAirports();
+      });
   }
 
   private initMap(): void {
     this.map = Leaflet.map('map', {
-      center: [ 39.8282, -98.5795 ],
+      center: [ 62.00000000, 10.00000000 ],
       zoom: 3
     });
 
     const tiles = Leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 18,
-      minZoom: 3,
+      minZoom: 1,
       attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     });
 
     tiles.addTo(this.map);
   }
-
-  constructor(private httpClient: HttpClient) { }
-
-  ngAfterViewInit(): void {
-    this.initMap();
-    this.sayHello();
-    this.makeCapitalMarkers();
-  }
-
-  
-
-  
-
-
-
-  
- 
-
-  
 }
 
 
