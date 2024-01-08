@@ -54,10 +54,21 @@ export class AppComponent implements AfterViewInit, OnInit {
       })
   }
 
+  private filterNextDepartures() {
+    const currentDate = new Date();
+
+    const nextDepartures = this.departures.filter((departure: any) => {
+      const departureDate = new Date(departure.dep_time_utc);
+      return departureDate >= currentDate;
+    }).slice(0, 5);
+
+    return nextDepartures;
+  }
+
   private initMap(): void {
     this.map = Leaflet.map('map', {
       center: [ 62.00000000, 10.00000000 ],
-      zoom: 3
+      zoom: 4
     });
 
     const tiles = Leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
