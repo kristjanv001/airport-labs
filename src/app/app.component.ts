@@ -5,27 +5,34 @@ import * as Leaflet from 'leaflet';
 import { LeafletModule } from '@asymmetrik/ngx-leaflet';
 import { MarkerService } from './marker.service';
 import { AirportsService } from './airports.service';
-
+import { ClockTimePipe } from './clock-time.pipe';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, LeafletModule],
+  imports: [CommonModule, RouterOutlet, LeafletModule, ClockTimePipe],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })
 export class AppComponent implements AfterViewInit, OnInit {
   title = 'airport-labs';
   departures: any = [];
+  filteredDepartures: any = [];
+  private uniqueKeySet: Set<String> = new Set();
   private airports: any = [];
   private map!: Leaflet.Map;
+  currentUnixTime: number;
 
   constructor(
     private markerService: MarkerService,
     private airportsService: AirportsService
-  ) { }
+  ) { 
+    this.currentUnixTime = Math.floor(Date.now() / 1000);
+  }
 
-  ngOnInit() { };
+  ngOnInit() { 
+
+  };
 
   ngAfterViewInit(): void {
     this.initMap();
@@ -49,20 +56,43 @@ export class AppComponent implements AfterViewInit, OnInit {
 
     this.airportsService.getAirportDepartures(IATACode)
       .subscribe((departures) => {
-        console.log(departures);
         this.departures = departures.response;
+        console.log(this.departures)
+
+        this.uniqueKeySet.clear();
+
+        this.filteredDepartures = departures.response
+          .filter((dep: any) => this.filterNextDepartures(dep))
+          .sort((a: any, b: any) => {
+            const depTimeA = a.dep_time_ts;
+            const depTimeB = b.dep_time_ts;
+            
+            return depTimeA - depTimeB;
+
+          })
+
+          // .slice(0, 5);
+        console.log(this.uniqueKeySet.size)
       })
+
+
   }
 
-  private filterNextDepartures() {
-    const currentDate = new Date();
+  private filterNextDepartures(dep: any) {
+    const uniqueKey = `${dep.dep_time_ts}-${dep.arr_iata}`;
 
-    const nextDepartures = this.departures.filter((departure: any) => {
-      const departureDate = new Date(departure.dep_time_utc);
-      return departureDate >= currentDate;
-    }).slice(0, 5);
+    if (
+      dep.status === 'active' || 
+      dep.status === 'landed' || 
+      dep.dep_actual_ts <= this.currentUnixTime ||
+      this.uniqueKeySet.has(uniqueKey)
+    ) {
+      return false;
+    }
 
-    return nextDepartures;
+    this.uniqueKeySet.add(uniqueKey);
+
+    return true;
   }
 
   private initMap(): void {

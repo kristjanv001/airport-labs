@@ -11,23 +11,30 @@
       <div id="map" class="h-full"></div>
     </div>
     
-    <div class="min-h-52 bg-dark-blue mt-16 p-5 md:w-2/4 md:mt-0 md:ml-3">
-      <h2 class="text-yellow font-bold text-3xl">Departures</h2>
+    <div class="min-h-52 bg-dark-blue mt-4 p-5 md:w-2/4 md:mt-0 md:ml-3">
+      <h2 class="text-yellow font-bold text-3xl">Next Five Departures</h2>
+
       <div class="mt-4 relative overflow-x-auto">
         <table class="table-auto text-almost-white text-xs w-full text-left rtl:text-right">
           <thead class="text-xs text-dark-blue uppercase bg-slate-200">
             <tr>
               <th scope="col" class="p-3 text-left">Time</th>
-              <th scope="col" class="p-3 text-left">Flight</th>
               <th scope="col" class="p-3 text-left">Destination</th>
               <th scope="col" class="p-3 text-left">Status</th>
             </tr>
           </thead>
           <tbody>
-            @for (departure of departures; track departure.flight_number) {
+            @for (departure of filteredDepartures; track departure.flight_number) {
               <tr class="border-b border-gray-800 ">
-                <td class="p-3 text-left">{{departure.dep_time}}</td>
-                <td class="p-3 text-left">{{departure.flight_number}}</td>
+                <td class="p-3 text-left">
+                  {{ departure.dep_time | clockTime }}
+                
+                  <ng-container *ngIf="departure.dep_delayed">
+                    <span class="text-yellow">Delayed</span>
+                
+                  </ng-container>
+                </td>
+              
                 <td class="p-3 text-left">{{departure.arr_iata}}</td>
                 <td class="p-3 text-left">{{departure.status}}</td>
               </tr>
