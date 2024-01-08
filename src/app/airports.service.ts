@@ -8,18 +8,31 @@ import { environment } from '../environments/environment';
   providedIn: 'root'
 })
 export class AirportsService {
+  private apiUrl = environment.apiUrl
+  private apiKey = environment.apiKey
 
   constructor(private http: HttpClient) { }
 
   getCountryAirports(countryCode: string): Observable<any> {
-    const { apiUrl, apiKey } = environment;
-    const url = `${apiUrl}?country_code=${countryCode}&api_key=${apiKey}`
+    const url = `${this.apiUrl}airports?country_code=${countryCode}&api_key=${this.apiKey}`
 
     return this.http.get<any>(url)
       .pipe(
         tap(_ => console.log("fetched airports")),
         catchError(this.handleError<any>('getCountryAirports', []))
       )
+  }
+
+  getAirportDepartures(IATACode: string): Observable<any> {
+    const url = `${this.apiUrl}schedules?dep_iata=${IATACode}&api_key=${this.apiKey}`
+
+    return this.http.get<any>(url)
+      .pipe(
+        tap(_ => console.log("fetched departures")),
+        catchError(this.handleError<any>('getAirportDepartures', []))
+      )
+
+
   }
 
   private handleError<T>(operation = 'operation', result?: T) {

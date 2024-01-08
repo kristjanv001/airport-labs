@@ -5,7 +5,6 @@ import * as Leaflet from 'leaflet';
 import { LeafletModule } from '@asymmetrik/ngx-leaflet';
 import { MarkerService } from './marker.service';
 import { AirportsService } from './airports.service';
-import { HttpClient } from '@angular/common/http';
 
 
 @Component({
@@ -14,21 +13,19 @@ import { HttpClient } from '@angular/common/http';
   imports: [CommonModule, RouterOutlet, LeafletModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
-  providers: [MarkerService, AirportsService]
 })
 export class AppComponent implements AfterViewInit, OnInit {
   title = 'airport-labs';
+  departures: any = [];
   private airports: any = [];
-  private markerService = inject(MarkerService);
-  private airportsService = inject(AirportsService);
-
   private map!: Leaflet.Map;
 
-  constructor(private httpClient: HttpClient) { }
+  constructor(
+    private markerService: MarkerService,
+    private airportsService: AirportsService
+  ) { }
 
-  ngOnInit() { 
-    
-  };
+  ngOnInit() { };
 
   ngAfterViewInit(): void {
     this.initMap();
@@ -36,16 +33,25 @@ export class AppComponent implements AfterViewInit, OnInit {
   }
 
   private displayCountryAirports() {
-    this.markerService.makeMarkers(this.map, this.airports);
+    this.markerService.makeMarkers(this.map, this.airports, this.getDepartures.bind(this));
   }
 
-  private getAirports(countryCode: string): void {
+  private getAirports(countryCode: string) {
     this.airportsService.getCountryAirports(countryCode)
       .subscribe((airports) => {
         this.airports = airports.response.filter((airport: any) => airport.iata_code !== null);
-
         this.displayCountryAirports();
       });
+  }
+
+  private getDepartures(IATACode: string) {
+    console.log("clicked on ", IATACode);
+
+    this.airportsService.getAirportDepartures(IATACode)
+      .subscribe((departures) => {
+        console.log(departures);
+        this.departures = departures.response;
+      })
   }
 
   private initMap(): void {

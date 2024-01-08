@@ -14,7 +14,11 @@
     <div class="min-h-52 bg-dark-blue mt-16 p-5 md:w-1/3 md:mt-0 md:ml-12">
       <h2 class="text-yellow font-bold text-3xl">Departures</h2>
       <div>
-        <p class="text-white">data here</p>
+        <ul>
+          @for (departure of departures; track departure.flight_number) {
+            <li class="text-almost-white">{{departure.flight_number}}</li>
+          }
+        </ul>
       </div>
     </div>
   </main>
