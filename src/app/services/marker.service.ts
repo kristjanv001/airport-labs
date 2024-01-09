@@ -1,17 +1,19 @@
 import { Injectable } from '@angular/core';
 import * as Leaflet from 'leaflet';
-import { AirportsService } from './airports.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MarkerService {
   
-  constructor(private airportsService: AirportsService) { }
+  constructor() { }
 
-  makeMarkers(map: Leaflet.Map, airports: any, markerClickHandler: (IATACode: string) => void): void {
+  makeMarkers(
+    map: Leaflet.Map, 
+    airports: any, 
+    markerClickHandler: (IATACode: string) => void
+  ): void {
     for (const airport of airports) {
-
       const markerIcon = Leaflet.icon({
         iconUrl: 'assets/leaflet/marker-icon.png',
         iconSize: [25, 41],
