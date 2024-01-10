@@ -4,6 +4,14 @@
   "newProjectRoot": "projects",
   "projects": {
     "airport-labs": {
+      "i18n": {
+        "sourceLocale": "en-US",
+        "locales": {
+          "et": {
+            "translation": "src/locale/messages.et.xlf"
+          }
+        }
+      },
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -13,6 +21,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
+            "localize": ["et"],
             "outputPath": "dist/airport-labs",
             "index": "src/index.html",
             "browser": "src/main.ts",
@@ -36,6 +45,17 @@
             }
           },
           "configurations": {
+            "et": {
+              "localize": [
+                "et"
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.et.ts"
+                }
+              ]
+            },
             "production": {
               "budgets": [
                 {
@@ -56,7 +76,13 @@
               "extractLicenses": false,
               "sourceMap": true,
               "ssr": false,
-              "prerender": false
+              "prerender": false,
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.development.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -69,6 +95,9 @@
             },
             "development": {
               "buildTarget": "airport-labs:build:development"
+            },
+            "et": {
+              "buildTarget": "airport-labs:build:development,et"
             }
           },
           "defaultConfiguration": "development"
@@ -90,6 +119,7 @@
             "assets": [
               "src/favicon.ico",
               "src/assets",
+              "src/environments/environment.ts",
               {
                 "glob": "**/*",
                 "input": "node_modules/leaflet/dist/images/",

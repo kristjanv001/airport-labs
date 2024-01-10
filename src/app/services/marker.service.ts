@@ -11,7 +11,7 @@ export class MarkerService {
   makeMarkers(
     map: Leaflet.Map, 
     airports: any, 
-    markerClickHandler: (IATACode: string) => void
+    markerClickHandler: (IATACode: string, airportName: string) => void
   ): void {
     for (const airport of airports) {
       const markerIcon = Leaflet.icon({
@@ -27,7 +27,7 @@ export class MarkerService {
 
       const marker = Leaflet.marker([airport.lat, airport.lng], { icon: markerIcon })
         .bindPopup(`<p>${airport.name} [${airport.iata_code}]</p>`).openPopup()
-        .on('click', () => markerClickHandler(airport.iata_code));
+        .on('click', () => markerClickHandler(airport.iata_code, airport.name));
       
       marker.addTo(map);
     }

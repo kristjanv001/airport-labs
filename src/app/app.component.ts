@@ -8,6 +8,8 @@ import { AirportsService } from './services/airports.service';
 import { ClockTimePipe } from './pipes/clock-time.pipe';
 import { LangDropdownComponent } from './components/lang-dropdown/lang-dropdown.component';
 import { Departure } from './interfaces/departure';
+import { Airport } from './interfaces/airport';
+
 
 @Component({
   selector: 'app-root',
@@ -19,19 +21,17 @@ import { Departure } from './interfaces/departure';
     LeafletModule,
     ClockTimePipe,
     LangDropdownComponent,
+    
   ],
 })
 export class AppComponent implements AfterViewInit, OnInit {
   title = 'a-labs';
-
   departures: Departure[] = [];
-  filteredDepartures: Departure[] = [];
-  filteredSortedDepartures: Departure[] = [];
-
-  private uniqueKeySet: Set<String> = new Set();
-  private airports: any = [];
+  airportName = "";
+  private airports: Airport[] = [];
+  
   private map!: Leaflet.Map;
-  currentUnixTime: number;
+  private currentUnixTime: number;
 
   constructor(
     private markerService: MarkerService,
@@ -47,7 +47,7 @@ export class AppComponent implements AfterViewInit, OnInit {
     this.getAirports('NO');
   }
 
-  private displayCountryAirports() {
+  private displayAirportMarkers() {
     this.markerService.makeMarkers(
       this.map,
       this.airports,
@@ -55,23 +55,24 @@ export class AppComponent implements AfterViewInit, OnInit {
     );
   }
 
-  // TODO: extract filtering and displaying
   private getAirports(countryCode: string) {
-    this.airportsService
-      .getCountryAirports(countryCode)
-      .subscribe((airports) => {
-        this.airports = airports.response.filter(
-          (airport: any) => airport.iata_code !== null
-        );
-        this.displayCountryAirports();
+    this.airportsService.getCountryAirports(countryCode)
+      .subscribe((reqResponse) => {
+        console.log(reqResponse)
+        this.airports = this.filterAirports(reqResponse.response);
+        this.displayAirportMarkers();
       });
   }
 
-  private getDepartures(IATACode: string) {
-    this.airportsService
-      .getAirportDepartures(IATACode)
+  private filterAirports(airports: Airport[]) {
+    return airports.filter((airport) => airport.iata_code !== null);
+  }
+
+  private getDepartures(IATACode: string, airportName: string) {
+    this.airportName = airportName;
+
+    this.airportsService.getAirportDepartures(IATACode)
       .subscribe((reqResponse) => {
-        // filter & sort
         this.departures = reqResponse.response;
         this.departures = this.filterDepartures(this.departures);
         this.departures = this.sortDepartures(this.departures);
@@ -89,24 +90,23 @@ export class AppComponent implements AfterViewInit, OnInit {
   }
 
   private filterDepartures(departures: Departure[]) {
+    const uniqueKeySet: Set<String> = new Set();
     const filtered = departures.filter((departure) => {
       const uniqueKey = `${departure.dep_time_ts}-${departure.arr_iata}`;
-
+      
       if (
         departure.status !== 'scheduled' ||
         departure.dep_actual_ts <= this.currentUnixTime ||
-        this.uniqueKeySet.has(uniqueKey)
-      ) {
-        return false;
-      }
-
-      this.uniqueKeySet.add(uniqueKey);
-
-      return true;
-    });
-
-    this.uniqueKeySet.clear();
-
+        uniqueKeySet.has(uniqueKey)
+        ) {
+          return false;
+        }
+        uniqueKeySet.add(uniqueKey);
+        
+        return true;
+      });
+    console.log(filtered)
+    
     return filtered;
   }
 

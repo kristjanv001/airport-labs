@@ -2,13 +2,13 @@
   <header class="flex justify-between h-24 md:h-44 items-center px-4">
     <h1 class="font-bold text-xl md:text-3xl">a-labs</h1>
     <nav>
-      <img src="/assets/icon-menu.svg" width="40" height="17" alt="" class="sm:hidden">
+      <img src="assets/icon-menu.svg" width="40" height="17" alt="" class="sm:hidden">
       <ul class="hidden sm:flex items-center text-gunmetal text-base">
         <li>
-          <a href="/" class="p-1">Home</a>
+          <a href="/" class="p-1" i18n>Home</a>
         </li>
         <li>
-          <a href="/" class="p-1 ml-10">About</a>
+          <a href="/" class="p-1 ml-10" i18n>About</a>
         </li>
         <li>
           <app-lang-dropdown></app-lang-dropdown>
@@ -19,31 +19,35 @@
 
   <main class="px-4 md:flex">
     
-    <div class="h-96 md:h-[50vh] md:w-2/4 rounded-md md:flex">
+    <div class="h-96 md:h-[50vh] md:w-3/5 rounded-md md:flex">
       <div id="map" class="h-full rounded-md grow"></div>
     </div>
     
-    <div class="min-h-[50vh] bg-dark-blue my-4 p-5 md:w-2/4 md:mt-0 md:ml-3 rounded-md">
-      <h2 class="text-yellow font-bold text-3xl">Next Five Departures</h2>
-
+    <div class="min-h-[50vh] bg-dark-blue my-4 p-5 md:w-2/5 md:mt-0 md:ml-3 rounded-md text-almost-white">
+      <h2 class="text-yellow font-bold text-3xl" i18n>Departures</h2>
+      <ng-container>
+        <p>{{airportName}}</p>
+      </ng-container>
       <div class="mt-4 relative overflow-x-auto">
-        <table class="table-auto text-almost-white text-xs w-full text-left rtl:text-right">
+        <table class="table-auto  text-xs w-full text-left rtl:text-right">
           <thead class="text-xs uppercase ">
             <tr>
-              <th scope="col" class="p-3 text-left">Time</th>
-              <th scope="col" class="p-3 text-left">Destination</th>
-              <th scope="col" class="p-3 text-left">Status</th>
+              <th scope="col" class="p-3 text-left" i18n>Time</th>
+              <th scope="col" class="p-3 text-left" i18n>Destination</th>
+              <th scope="col" class="p-3 text-left" i18n>Status</th>
             </tr>
           </thead>
           <tbody>
             @for (departure of departures; track departure.flight_number) {
               <tr class="border-b border-gray-800 ">
                 <td class="p-3 text-left">
-                  {{ departure.dep_time | clockTime }}
+                  <span [ngClass]="{'line-through': departure.dep_delayed}">
+                    {{ departure.dep_time | clockTime }}
+                  </span>
                 
                   @if (departure.dep_delayed) {
                     <ng-container>
-                      <span class="text-yellow">Delayed</span>
+                      <p class="text-yellow">New time: {{departure.dep_estimated | clockTime}}</p>
                     </ng-container>
                   }
                 </td>
